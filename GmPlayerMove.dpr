@@ -383,9 +383,9 @@ begin
   else
   begin
     if Language = Russian then
-      AssignFile(Dictionary, 'D:\BSUIR\ERUDIT\dictionaries\russian.txt')
+      AssignFile(Dictionary, '..\..\dictionaries\russian.txt')
     else
-      AssignFile(Dictionary, 'D:\BSUIR\ERUDIT\dictionaries\english.txt');
+      AssignFile(Dictionary, '..\..\dictionaries\english.txt');
     Reset(Dictionary);
     FramePos := 1;
     while not Eof(Dictionary) do
