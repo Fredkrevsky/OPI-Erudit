@@ -64,62 +64,55 @@ begin
 end;
 
 procedure ChoiceOfLanguage; //выбор языка
+var
+  s : string;
+  ChoiceLanguage, c : integer;
 begin
   repeat
-    try
+    repeat
       Writeln;
       Writeln('===*  Выберите язык (1 - русский, 2 - английский)  *===');
       Writeln;
-      Readln(I);
+      Readln(s);
       Writeln;
-      if I=1 then
+      val(s,ChoiceLanguage,c);
+      if c <> 0 then Writeln('===*  Ошибка ввода  *===');
+    until c = 0;
+    if ChoiceLanguage = 1 then
+    begin
+      Language := Russian;
+      Writeln('===*  Выбран русский язык  *===');
+    end
+    else if ChoiceLanguage = 2 then
       begin
-        Language := Russian;
-        Writeln('===*  Выбран русский язык  *===');
+        Language := English;
+        Writeln('===*  Выбран английский язык  *===');
       end
-        else if I=2 then
-        begin
-          Language := English;
-          Writeln('===*  Выбран английский язык  *===');
-        end
-          else Writeln('===*  Ошибка ввода  *===');
-    except
-      Writeln;
-      Writeln('===*  Ошибка ввода  *===');
-    end;
-    until (I=1) or (I=2);
+      else Writeln('===*  Ошибка ввода  *===');
+  until (ChoiceLanguage = 1) or (ChoiceLanguage = 2);
   Writeln;
   Writeln('Нажмите ENTER...');
   Readln;
 end;
 
-procedure NamePlayers; //ввод игроков
+procedure NamePlayers(var PlayersCount: SmallInt); //ввод игроков
 var
-  I : integer;
+  I, c : integer;
+  s : string;
 begin
-  Writeln;
-  Writeln('===*  Введите количество игроков  *===');
-  Writeln;
   repeat
-    try
-      Readln(PlayersCount);
-      if (PlayersCount>10) or (PlayersCount<=1) then
-        begin
-          Writeln;
-          Writeln('===*  Ошибка ввода  *===');
-        end
-        else
-        begin
-          Writeln;
-          Writeln('===*  Учавствуют ',PlayersCount,' игрока(-ов)  *===');
-        end;
+    repeat
       Writeln;
-    except
+      Writeln('===*  Введите количество игроков  *===');
       Writeln;
-      Writeln('===*  Ошибка ввода  *===');
+      Readln(s);
       Writeln;
-    end;
+      val(s,PlayersCount,c);
+      if c <> 0 then Writeln('===*  Ошибка ввода  *===');
+    until c = 0;
+    if (PlayersCount <= 1) or (PlayersCount > 10) then Writeln('===*  Ошибка ввода  *===');
   until (PlayersCount<=10) and (PlayersCount>1);
+  Writeln('===*  Учавствуют ',PlayersCount,' игрока(-ов)  *===');
   Writeln;
   Writeln('===*  Введите свои имена  *===');
   Writeln;
@@ -183,7 +176,7 @@ const
 var
   ltrPos: integer;
 begin
-  while MaxLettersCount - length(LettersSet) > 0 do
+  while (Length(Playfield) > 0) and (MaxLettersCount - length(LettersSet) > 0) do
   begin
     ltrPos := random(Length(Playfield)) + 1;
     Insert(Playfield[ltrPos], LettersSet, 1);
@@ -506,7 +499,7 @@ begin
   clrscr;
   ChoiceOfLanguage;
   clrscr;
-  NamePlayers;
+  NamePlayers(PlayersCount);
   clrscr;
   FillPlayfield(Playfield,Language);
   I := 1;
