@@ -9,40 +9,30 @@ uses
 
 const
   MaxPlayerCount = 10;
+  WordsCount = 80000;
 
 type
   TLanguage = (Russian, English);
-
+  TDict = array [1..WordsCount] of string;
   TPlayersNames = array [1..MaxPlayerCount] of string;
   TPlayersScore = array [1..MaxPlayerCount] of integer;
   TLettersSets = array [1..MaxPlayerCount] of string;
 
 var
   Language: TLanguage;
+  Dictionary: text;
+  Dict: TDict;
+  FramePos: integer;
+
   PlayersCount: SmallInt = 5;
   PlayerName: TPlayersNames;
   PlayerScore: TPlayersScore;
   LettersSet: TLettersSets;
 
   Playfield: string;
+  LettersCount: integer;
 
   i: integer;
-
-procedure ShowLogo();
-var
-  Logo: text;
-  LogoString: string;
-begin
-  AssignFile(Logo, 'D:\Users\pud70\Desktop\AAASSSDAASAAA\ÎÀèÏ\LAB8 GAME\dictionaries\logo.txt');
-  Reset(Logo);
-  while not Eof(Logo) do
-  begin
-    Readln(Logo, LogoString);
-    Writeln(LogoString);
-    Sleep(100);
-  end;  
-end;
-
 
 function LangChoose(): TLanguage;
 var Lang: SmallInt;
@@ -80,7 +70,7 @@ begin
   writeln;
 end;
 
-procedure FillPlayfield(var Playfield: string; Language: TLanguage);
+procedure FillPlayfield(var Playfield: string; Language: TLanguage; var LettersCount: integer);
 const
   RusABCConsonants = 'áâãäæçéêëìíïðñòôõö÷øùúü';
   RusABCVowels = 'àå¸èîóûýþÿ';
@@ -96,6 +86,7 @@ begin
         Playfield := Concat(Playfield, RusABCConsonants);
       for i := 1 to 8 do
         Playfield := Concat(Playfield, RusABCVowels);
+      LettersCount := Length(Playfield);
     end;
     English:
     begin
@@ -103,6 +94,7 @@ begin
         Playfield := Concat(Playfield, EngABCConsonants);
       for i := 1 to 8 do
         Playfield := Concat(Playfield, EngABCVowels);
+      LettersCount := Length(Playfield);
     end;
   end;
 end;
@@ -114,7 +106,7 @@ var
   ltrPos: integer;
 
 begin
-  while MaxLettersCount - length(LettersSet) > 0 do
+  while (Length(Playfield) > 0) and (MaxLettersCount - length(LettersSet) > 0) do
   begin
     ltrPos := random(Length(Playfield)) + 1;
     Insert(Playfield[ltrPos], LettersSet, 1);
@@ -126,13 +118,26 @@ begin
 end;
 
 begin
-  ShowLogo();
   Language := LangChoose();
 
   { choosing players here }
 
   { filling playfield of letters }
-  FillPlayfield(Playfield, Language);
+  LettersCount := 0;
+  FillPlayfield(Playfield, Language, LettersCount);
+
+  {reading a dictionary}
+  case Language of
+    Russian: AssignFile(Dictionary, '.\dictionaries\russian.txt');
+    English: AssignFile(Dictionary, '.\dictionaries\english.txt');
+  end;
+  Reset(Dictionary);
+  FramePos := 1;
+  while not Eof(Dictionary) do
+  begin
+    readln(Dictionary, Dict[FramePos]);
+    Inc(FramePos);
+  end;
 
   { giving a player a set of letters }
   for i := 1 to PlayersCount do

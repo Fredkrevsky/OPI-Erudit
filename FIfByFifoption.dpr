@@ -26,34 +26,37 @@ var
   LettersSet: TLettersSets;
 
   Playfield: string;
-
-  IsGameBeginning: boolean;
+  LettersCount: integer = 0;
 
   i: integer;
 
-procedure FillPlayfield(var Playfield: string; Language: TLanguage);
+procedure FillPlayfield(var Playfield: string; Language: TLanguage; var LettersCount: integer);
 const
   RusABCConsonants = 'бвгджзйклмнпрстфхцчшщъь';
   RusABCVowels = 'аеёиоуыэюя';
   EngABCConsonants = 'bcdfghjklmnpqrstvwxz';
   EngABCVowels = 'aeiouy';
 var
-  i: SmallInt;
+  i: byte;
 begin
   case Language of
     Russian:
     begin
       for i := 1 to 4 do
         Playfield := Concat(Playfield, RusABCConsonants);
+      LettersCount := LettersCount + Length(RusABCConsonants) * 4;
       for i := 1 to 8 do
         Playfield := Concat(Playfield, RusABCVowels);
+      LettersCount := LettersCount + Length(RusABCVowels) * 8;
     end;
     English:
     begin
       for i := 1 to 4 do
         Playfield := Concat(Playfield, EngABCConsonants);
+      LettersCount := LettersCount + Length(EngABCConsonants) * 4;
       for i := 1 to 8 do
         Playfield := Concat(Playfield, EngABCVowels);
+      LettersCount := LettersCount + Length(EngABCVowels) * 8;
     end;
   end;
 end;
@@ -65,7 +68,7 @@ var
   ltrPos: integer;
 
 begin
-  while MaxLettersCount - length(LettersSet) > 0 do
+  while (Length(Playfield) > 0) and (MaxLettersCount - length(LettersSet) > 0) do
   begin
     ltrPos := random(Length(Playfield)) + 1;
     Insert(Playfield[ltrPos], LettersSet, 1);
@@ -74,13 +77,12 @@ begin
 
   Sleep(500);
   writeln('-----------------------------------------');
-  writeln;
 end;
 
 procedure FifByFif(var Playfield, LettersSet: string; var PlayerScore: integer);
 const
-  ChangesCount: SmallInt = 5;
-  Penalty: SmallInt = 2;
+  ChangesCount = 5;
+  Penalty = 2;
 var
   EntSet, TempSet: string;
   i, counter, ltrPos: SmallInt;
@@ -88,10 +90,11 @@ var
 
 begin
   writeln('Ваши буквы: ', LettersSet);
-  write('Введите те буквы, которые хотите заменить: ');
+  write('Введите 5 букв, которые хотите заменить: ');
   TempSet := LettersSet;
   repeat
     readln(EntSet);
+    EntSet := LowerCase(EntSet);
     counter := 0;
     LettersSet := TempSet;
     InputError := false;
@@ -99,7 +102,7 @@ begin
 
     while (InputError = false) and (i <= Length(EntSet)) do
     begin
-      ltrPos := Pos(EntSet[i], LettersSet, 1);
+      ltrPos := Pos(EntSet[i], LettersSet);
       if (counter < ChangesCount) and (ltrPos <> 0) then
       begin
         Inc(i);
@@ -133,11 +136,10 @@ begin
       Ent := true;
 
   until Ent;
-                                                writeln('Сейчaс введено: ', EntSet);
-                                                writeln('Измененная строка: ', LettersSet);
-
+                                       //         writeln('Сейчaс введено: ', EntSet);
+                                         //       writeln('Измененная строка: ', LettersSet);
   Dec(PlayerScore, Penalty);
-  writeln('Кол-то Ваших очков уменьшено на ', Penalty, ' и теперь составляет ', PlayerScore);
+  writeln('Кол-во Ваших очков уменьшено на ', Penalty, ' и теперь составляет ', PlayerScore);
 
   FillLettersSet(Playfield, LettersSet);
   writeln('Ваша новая строка: ', LettersSet);
@@ -150,7 +152,7 @@ end;
 
 begin
   Language := Russian;
-  FillPlayfield(Playfield, Language);
+  FillPlayfield(Playfield, Language, LettersCount);
 
   LettersSet[1] := 'кпокумиода'; PlayerScore[1] := 100;
 
