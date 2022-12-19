@@ -86,13 +86,17 @@ begin
   write('Выберите номер игрока, у которого Вы хотите обменять букву: ');
   repeat
     Ent := false;
-    readln(FriendNumber);
+    try
+      readln(FriendNumber);
+    except
+      FriendNumber := 0;
+    end;
     if (FriendNumber <= 0) or (FriendNumber > PlayerCount) then
-      write('Некоррекный номер игрока. Введите номер ещё раз: ')
-    else if FriendNumber = PlayerNumber then
-      write('Вы не можете взять букву у самого себя. Введите номер ещё раз: ')
-    else
-      Ent := true;
+        write('Некоррекный номер игрока. Введите номер ещё раз: ')
+      else if FriendNumber = PlayerNumber then
+        write('Вы не можете взять букву у самого себя. Введите номер ещё раз: ')
+      else
+        Ent := true;
   until Ent;
 
   writeln('Его буквы: ', LettersSet[FriendNumber]);

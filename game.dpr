@@ -22,7 +22,7 @@ var
   Language: TLanguage;
   Dictionary: text;
   Dict: TDict;
-  FramePos: integer;
+  FramePos, StartFramePos: integer;
 
   PlayersCount: SmallInt = 5;
   PlayerName: TPlayersNames;
@@ -138,6 +138,7 @@ begin
     readln(Dictionary, Dict[FramePos]);
     Inc(FramePos);
   end;
+  StartFramePos := FramePos;
 
   { giving a player a set of letters }
   for i := 1 to PlayersCount do
@@ -147,6 +148,13 @@ begin
   end;
 
   { 50 by 50 }
+
+  { updating the dictionary }
+  Close(Dictionary);
+  Append(Dictionary);
+  for i := StartFramePos to FramePos - 1 do
+    Writeln(Dictionary, Dict[i]);
+
 
 
   writeln('здесь конец программы');
