@@ -1,4 +1,4 @@
-program Game;
+program EruditGame;
 
 {$APPTYPE CONSOLE}
 
@@ -26,7 +26,7 @@ var
   Skip : TSkip;
   Dictionary: text;
   Dict: TDict;
-  FramePos: integer;
+  StartFramePos, FramePos: integer;
   LettersSet: TLettersSets;
   PlayerScore: TPlayersScore;
   PlayerName: TPlayersNames;
@@ -71,7 +71,7 @@ begin
   Sleep(3000);
 end;
 
-procedure ChoiceOfLanguage(var Dictionary : text); //выбор языка
+procedure ChoiceOfLanguage(var Language : TLanguage); //выбор языка
 var
   s : string;
   ChoiceLanguage, c : integer;
@@ -103,7 +103,7 @@ begin
   Readln;
 end;
 
-procedure NamePlayers(var PlayersCount: SmallInt); //ввод игроков
+procedure NamePlayers(var PlayersCount: SmallInt; const MaxPlayerCount: SmallInt); //ввод игроков
 var
   I, c : integer;
   s : string;
@@ -118,7 +118,7 @@ begin
       val(s,PlayersCount,c);
       if c <> 0 then Writeln('===*  Ошибка ввода  *===');
     until c = 0;
-    if (PlayersCount <= 1) or (PlayersCount > 10) then Writeln('===*  Ошибка ввода  *===');
+    if (PlayersCount <= 1) or (PlayersCount > MaxPlayerCount) then Writeln('===*  Ошибка ввода  *===');
   until (PlayersCount<=10) and (PlayersCount>1);
   Writeln('===*  Учавствуют ',PlayersCount,' игрока(-ов)  *===');
   Writeln;
@@ -262,7 +262,7 @@ begin
   writeln('-----------------------------------------------------------------------------------------------------------------------');
 end;
 
-procedure FriendHelp(LettersSet: TLettersSets; PlayerNumber: SmallInt; const MaxPlayerCount: SmallInt);
+procedure FriendHelp(LettersSet: TLettersSets; PlayerNumber: SmallInt; const PlayerCount: SmallInt);
 const
   ABC = 'бвгджзйклмнпрстфхцчшщъьаеёиоуыэюяbcdfghjklmnpqrstvwxzaeiouyБВГДЖЗЙКЛМНПРСТФХЦЧШЩЪЬАЕЁИОУЫЭЮЯBCDFGHJKLMNPQRSTVWXZAEIOUY';
 var
@@ -276,7 +276,12 @@ begin
   repeat
     Ent := false;
     readln(FriendNumber);
-    if (FriendNumber <= 0) or (FriendNumber > MaxPlayerCount) then
+    try
+      readln(FriendNumber);
+    except
+      FriendNumber := 0;
+    end;
+    if (FriendNumber <= 0) or (FriendNumber > PlayerCount) then
       write('Некоррекный номер игрока. Введите номер ещё раз: ')
     else if FriendNumber = PlayerNumber then
       write('Вы не можете взять букву у самого себя. Введите номер ещё раз: ')
@@ -499,7 +504,7 @@ begin
       3 : begin
           if ChoiceHelp[I] then
           begin
-            FriendHelp(LettersSet, i, MaxPlayerCount);
+            FriendHelp(LettersSet, i, PlayersCount);
             Position := 0;
             ChoiceHelp[I] := false
           end
@@ -531,13 +536,13 @@ begin
   Position := 0;
   ShowLogo;
   clrscr;
-  ChoiceOfLanguage(Dictionary);
+  ChoiceOfLanguage(Language);
   clrscr;
   LettersCount := 0;
   FillPlayfield(Playfield,Language,LettersCount);
   case Language of
-    Russian: AssignFile(Dictionary, '..\..\dictionaries\russian.txt');
-    English: AssignFile(Dictionary, '..\..\dictionaries\english.txt');
+    Russian: AssignFile(Dictionary, '.\dictionaries\russian.txt');
+    English: AssignFile(Dictionary, '.\dictionaries\english.txt');
   end;
   Reset(Dictionary);
   FramePos := 1;
@@ -546,7 +551,8 @@ begin
     readln(Dictionary, Dict[FramePos]);
     Inc(FramePos);
   end;
-  NamePlayers(PlayersCount);
+  StartFramePos := FramePos;
+  NamePlayers(PlayersCount, MaxPlayerCount);
   clrscr;
   FillPlayfield(Playfield,Language,LettersCount);
   for I := 1 to PlayersCount do ChoiceHelp[I] := true;
@@ -583,5 +589,10 @@ begin
   Writeln;
   Sleep(1000);
   Writeln('Победил ',Max,'-й игрок с именем ',PlayerName[Max],', поздравляем!');
+
+  Close(Dictionary);
+  Append(Dictionary);
+  for i := StartFramePos to FramePos - 1 do
+    Writeln(Dictionary, Dict[i]);
   Readln;
 end.
