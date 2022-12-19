@@ -127,10 +127,13 @@ begin
   for I := 1 to PlayersCount do
   begin
     repeat
-      Write(I,'. ');
-      Readln(NameTemp);
-      NameTemp := Trim(NameTemp);
-      PlayerName[I] := NameTemp;
+      repeat
+        Write(I,'. ');
+        Readln(NameTemp);
+        NameTemp := Trim(NameTemp);
+        if NameTemp<>'' then PlayerName[I] := NameTemp
+        else Writeln('Введите хоть что-нибудь');
+      until NameTemp<>'';
       fl := true;
       J := 1;
       while (J<=I-1) and fl do
@@ -151,7 +154,7 @@ begin
   Readln;
 end;
 
-procedure FillPlayfield (var Playfield: string; Language: TLanguage; var LettersCount: integer);
+procedure FillPlayfield(var Playfield: string; Language: TLanguage);
 const
   RusABCConsonants = 'бвгджзйклмнпрстфхцчшщъь';
   RusABCVowels = 'аеёиоуыэюя';
@@ -165,19 +168,15 @@ begin
     begin
       for i := 1 to 4 do
         Playfield := Concat(Playfield, RusABCConsonants);
-      LettersCount := LettersCount + Length(RusABCConsonants) * 4;
       for i := 1 to 8 do
         Playfield := Concat(Playfield, RusABCVowels);
-      LettersCount := LettersCount + Length(RusABCVowels) * 8;
     end;
     English:
     begin
       for i := 1 to 4 do
         Playfield := Concat(Playfield, EngABCConsonants);
-      LettersCount := LettersCount + Length(EngABCConsonants) * 4;
       for i := 1 to 8 do
         Playfield := Concat(Playfield, EngABCVowels);
-      LettersCount := LettersCount + Length(EngABCVowels) * 8;
     end;
   end;
 end;
@@ -188,7 +187,7 @@ const
 var
   ltrPos: integer;
 begin
-  while (Length(Playfield) > 0) and (MaxLettersCount - length(LettersSet) > 0) do
+  while {(Length(Playfield) > 0) and }(MaxLettersCount - length(LettersSet) > 0) do
   begin
     ltrPos := random(Length(Playfield)) + 1;
     Insert(Playfield[ltrPos], LettersSet, 1);
@@ -252,8 +251,8 @@ begin
     else
       Ent := true;
   until Ent;
-  writeln('Сейчaс введено: ', EntSet);
-  writeln('Измененная строка: ', LettersSet);
+//  writeln('Сейчaс введено: ', EntSet);
+//  writeln('Измененная строка: ', LettersSet);
   Dec(PlayerScore, Penalty);
   writeln('Кол-во Ваших очков уменьшено на ', Penalty, ' и теперь составляет ', PlayerScore);
   FillLettersSet(Playfield, LettersSet);
@@ -275,7 +274,6 @@ begin
   write('Выберите номер игрока, у которого Вы хотите обменять букву: ');
   repeat
     Ent := false;
-    readln(FriendNumber);
     try
       readln(FriendNumber);
     except
@@ -338,7 +336,7 @@ begin
   Writeln('-----------------------------------------------------------------------------------------------------------------------');
 end;
 
-procedure PlayerTurn(Language: TLanguage; var Dict: TDict; var FramePos: integer; Playfield: string; LettersSet: string; PlayerScore: integer; const PlayersCount: SmallInt);
+procedure PlayerTurn(Language: TLanguage; var Dict: TDict; var FramePos: integer; Playfield: string; CurrPlayer: SmallInt; var LettersSet: string; PlayerScore: integer; const PlayersCount: SmallInt);
 const StrsCount = 80000;
 type
   TDict = array [1..StrsCount] of string;
@@ -408,20 +406,24 @@ begin
       Agree := true;
       while Agree and (i <= PlayersCount) do
       begin
-        write(i, '-й игрок (да/нет): ');
-        repeat
-          readln(AddWord);
-          Ent := true;
-          if (AddWord = 'да') or (AddWord = 'yes') or (AddWord = 'y') or (AddWord = 'д') then
-            Inc(i)
-          else if (AddWord = 'нет') or (AddWord = 'no') or (AddWord = 'n') or (AddWord = 'н') then
-            Agree := false
-          else
-          begin
-            Ent := false;
-            write('Некорректный ввод. Повторите попытку (да/нет): ');
-          end;
-        until Ent;
+        if i <> CurrPlayer then
+        begin
+          write(i, '-й игрок (да/нет): ');
+          repeat
+            readln(AddWord);
+            Ent := true;
+            if (AddWord = 'да') or (AddWord = 'yes') or (AddWord = 'y') or (AddWord = 'д') then
+
+            else if (AddWord = 'нет') or (AddWord = 'no') or (AddWord = 'n') or (AddWord = 'н') then
+              Agree := false
+            else
+            begin
+              Ent := false;
+              write('Некорректный ввод. Повторите попытку (да/нет): ');
+            end;
+          until Ent;
+        end;
+      Inc(i);
       end;
       if Agree then
       begin
@@ -484,7 +486,7 @@ begin
     clrscr;
     fl := true;
     case Choice of
-      1 : begin PlayerTurn(Language,Dict,FramePos,Playfield,LettersSet[I],PlayerScore[I],PlayersCount);
+      1 : begin PlayerTurn(Language,Dict,FramePos,Playfield, I, LettersSet[I],PlayerScore[I],PlayersCount);
           Position := 0; end;
       2 : begin
           if ChoiceHelp[I] then
@@ -539,7 +541,6 @@ begin
   ChoiceOfLanguage(Language);
   clrscr;
   LettersCount := 0;
-  FillPlayfield(Playfield,Language,LettersCount);
   case Language of
     Russian: AssignFile(Dictionary, '.\dictionaries\russian.txt');
     English: AssignFile(Dictionary, '.\dictionaries\english.txt');
@@ -554,7 +555,7 @@ begin
   StartFramePos := FramePos;
   NamePlayers(PlayersCount, MaxPlayerCount);
   clrscr;
-  FillPlayfield(Playfield,Language,LettersCount);
+  FillPlayfield(Playfield,Language);
   for I := 1 to PlayersCount do ChoiceHelp[I] := true;
   I := 1;
   repeat
@@ -593,6 +594,9 @@ begin
   Close(Dictionary);
   Append(Dictionary);
   for i := StartFramePos to FramePos - 1 do
+  begin
+  //  writeln('writed: ', Dict[i]);
     Writeln(Dictionary, Dict[i]);
+  end;
   Readln;
 end.
