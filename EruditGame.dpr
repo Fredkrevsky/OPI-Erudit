@@ -34,7 +34,7 @@ var
   Language: TLanguage;
   NameTemp, Playfield: string;
   fl, endgame : boolean;
-  LettersCount: integer = 0;
+  LastLetter: char;
 
 procedure clrscr; //очистка консоли
 var
@@ -68,7 +68,13 @@ begin
   Writeln('                     ЭЭЭЭ     РРРРРРР          УУУ          ДД    ДД       ИИ  ИИ   ИИ         ТТТТ     ');
   Writeln('                   ЭЭЭЭ       РР              УУУ          ДДДДДДДДДД      ИИ ИИ    ИИ         ТТТТ     ');
   Writeln('                 ЭЭЭЭЭ        РР             УУУ          ДД        ДД     ИИИИ     ИИ         ТТТТ     ');
-  Sleep(3000);
+  writeln;
+  writeln;
+  writeln;
+  writeln;
+  Sleep(1000);
+  write('Для продолжения нажмите ENTER...');
+  readln;
 end;
 
 procedure ChoiceOfLanguage(var Language : TLanguage); //выбор языка
@@ -82,6 +88,7 @@ begin
       Writeln('===*  Выберите язык (1 - русский, 2 - английский)  *===');
       Writeln;
       Readln(s);
+      s := trim(s);
       Writeln;
       val(s,ChoiceLanguage,c);
       if c <> 0 then Writeln('===*  Ошибка ввода  *===');
@@ -114,13 +121,14 @@ begin
       Writeln('===*  Введите количество игроков  *===');
       Writeln;
       Readln(s);
+      s := trim(s);
       Writeln;
       val(s,PlayersCount,c);
       if c <> 0 then Writeln('===*  Ошибка ввода  *===');
     until c = 0;
     if (PlayersCount <= 1) or (PlayersCount > MaxPlayerCount) then Writeln('===*  Ошибка ввода  *===');
   until (PlayersCount<=10) and (PlayersCount>1);
-  Writeln('===*  Учавствуют ',PlayersCount,' игрока(-ов)  *===');
+  Writeln('===*  Участвуют ',PlayersCount,' игрока(-ов)  *===');
   Writeln;
   Writeln('===*  Введите свои имена  *===');
   Writeln;
@@ -138,7 +146,7 @@ begin
       J := 1;
       while (J<=I-1) and fl do
       begin
-        if PlayerName[I]=PlayerName[J] then fl := false;
+        if AnsiLowerCase(PlayerName[I])=AnsiLowerCase(PlayerName[J]) then fl := false;
         inc(J);
       end;
       if not fl then
@@ -187,7 +195,7 @@ const
 var
   ltrPos: integer;
 begin
-  while {(Length(Playfield) > 0) and }(MaxLettersCount - length(LettersSet) > 0) do
+  while (Length(Playfield) > 0) and (MaxLettersCount - length(LettersSet) > 0) do
   begin
     ltrPos := random(Length(Playfield)) + 1;
     Insert(Playfield[ltrPos], LettersSet, 1);
@@ -207,12 +215,12 @@ var
   Ent, InputError: boolean;
 begin
   writeln;
-  writeln('Ваши буквы: ', LettersSet);
+//  writeln('Ваши буквы: ', LettersSet);
   write('Введите 5 букв, которые хотите заменить: ');
   TempSet := LettersSet;
   repeat
     readln(EntSet);
-    EntSet := LowerCase(EntSet);
+    EntSet := AnsiLowerCase(EntSet);                          // writeln(entset);
     counter := 0;
     LettersSet := TempSet;
     InputError := false;
@@ -220,7 +228,7 @@ begin
     while (InputError = false) and (i <= Length(EntSet)) do
     begin
       ltrPos := Pos(EntSet[i], LettersSet);
-      if (counter < ChangesCount) and (ltrPos <> 0) then
+      if (counter <= ChangesCount) and (ltrPos <> 0) then
       begin
         Inc(i);
         Delete(LettersSet, ltrPos, 1);
@@ -236,6 +244,11 @@ begin
     if InputError then
     begin
       write('Вы ошиблись при вводе. Введите буквы ещё раз: ');
+      Ent := false;
+    end
+    else if Length(EntSet) < 1 then
+    begin
+      write('Вы ничего не ввели. Введите буквы ещё раз: ');
       Ent := false;
     end
     else if counter < ChangesCount then
@@ -256,24 +269,25 @@ begin
   Dec(PlayerScore, Penalty);
   writeln('Кол-во Ваших очков уменьшено на ', Penalty, ' и теперь составляет ', PlayerScore);
   FillLettersSet(Playfield, LettersSet);
-  writeln('Ваша новая строка: ', LettersSet);
+  writeln('Ваши новые буквы: ', LettersSet);
   Sleep(500);
   writeln('-----------------------------------------------------------------------------------------------------------------------');
 end;
 
-procedure FriendHelp(LettersSet: TLettersSets; PlayerNumber: SmallInt; const PlayerCount: SmallInt);
+procedure FriendHelp(var LettersSet: TLettersSets; PlayerNumber: SmallInt; const PlayerCount: SmallInt);
 const
   ABC = 'бвгджзйклмнпрстфхцчшщъьаеёиоуыэюяbcdfghjklmnpqrstvwxzaeiouyБВГДЖЗЙКЛМНПРСТФХЦЧШЩЪЬАЕЁИОУЫЭЮЯBCDFGHJKLMNPQRSTVWXZAEIOUY';
 var
   Ent: boolean;
-  FriendNumber, j, MyP, FrP: SmallInt;
+  FriendNumber, MyP, FrP: SmallInt;
   MyLetter, FriendLetter: string;
 begin
   writeln;
-  writeln('Ваши буквы: ', LettersSet[PlayerNumber]);
+ // writeln('Ваши буквы: ', LettersSet[PlayerNumber]);
   write('Выберите номер игрока, у которого Вы хотите обменять букву: ');
+
+  Ent := false;
   repeat
-    Ent := false;
     try
       readln(FriendNumber);
     except
@@ -286,12 +300,14 @@ begin
     else
       Ent := true;
   until Ent;
-  writeln('Его буквы: ', LettersSet[FriendNumber]);
+
+ // writeln('Его буквы: ', LettersSet[FriendNumber]);
   write('Выберите свою букву, которую хотите отдать: ');
+
+  Ent := false;
   repeat
-    Ent := false;
     readln(MyLetter);
-    MyLetter := LowerCase(Trim(MyLetter));
+    MyLetter := AnsiLowerCase(Trim(MyLetter));
     if Length(MyLetter) > 1 then
       write('Вы ввели строку, а не букву. Выберите букву ещё раз: ')
     else if Length(MyLetter) = 0 then
@@ -303,16 +319,12 @@ begin
     else
       Ent := true;
   until Ent;
-  write('Выберите букву друга, которую хотите забрать: ');
+
+  write('Выберите букву соперника, которую хотите забрать: ');
+  Ent := false;
   repeat
-    Ent := false;
     readln(FriendLetter);
-    j := 1;
-    while j <= length(FriendLetter) do
-      if FriendLetter[j] = ' ' then
-        Delete(FriendLetter, j, 1)
-      else
-        Inc(j);
+    FriendLetter := AnsiLowerCase(Trim(FriendLetter));
     if Length(FriendLetter) > 1 then
       write('Вы ввели строку, а не букву. Выберите букву ещё раз: ')
     else if Length(FriendLetter) = 0 then
@@ -320,10 +332,13 @@ begin
     else if Pos(FriendLetter, ABC) = 0 then
       write('Это не буква. Выберите букву ещё раз: ')
     else if Pos(FriendLetter, LettersSet[FriendNumber]) = 0 then
-      write('Такой буквы нет среди букв друга. Выберите букву ещё раз: ')
+      write('Такой буквы нет среди букв соперника. Выберите букву ещё раз: ')
+    else if MyLetter = FriendLetter then
+      write('Вы забираете ту же букву, что и отдаёте. Выберите букву ещё раз: ')
     else
       Ent := true;
   until Ent;
+
   MyP := Pos(MyLetter, LettersSet[PlayerNumber]);
   FrP := Pos(FriendLetter, LettersSet[FriendNumber]);
   Insert(Myletter, LettersSet[FriendNumber], FrP);
@@ -336,13 +351,10 @@ begin
   Writeln('-----------------------------------------------------------------------------------------------------------------------');
 end;
 
-procedure PlayerTurn(Language: TLanguage; var Dict: TDict; var FramePos: integer; Playfield: string; CurrPlayer: SmallInt; var LettersSet: string; PlayerScore: integer; const PlayersCount: SmallInt);
-const StrsCount = 80000;
-type
-  TDict = array [1..StrsCount] of string;
+procedure PlayerTurn(Language: TLanguage; var Dict: TDict; var FramePos: integer; var Playfield: string; CurrPlayer: SmallInt; var LettersSet: string; var PlayerScore: integer; var Skip: boolean; const PlayersCount: SmallInt; var LastLetter: char);
 var
   Alphabet, PlayerWord, AddWord, TempSet: string;
-  i: integer;
+  i, ltrPos: integer;
   Points: byte;
   Ent, RightLetters, Found, Agree: boolean;
 begin
@@ -353,180 +365,241 @@ begin
     English:
       Alphabet := 'bcdfghjklmnpqrstvwxzaeiouy';
   end;
+
   write('Введите слово: ');
   repeat
     readln(PlayerWord);
-    PlayerWord := Trim(LowerCase(PlayerWord));
+    PlayerWord := AnsiLowerCase(Trim(PlayerWord));                                                          // writeln(playerword);
+    i := 1;
     Ent := true;
-    i := 1;
-    while Ent and (i <= length(PlayerWord)) do
-      if Pos(PlayerWord[i], Alphabet) = 0 then
-      begin
-        Ent := false;
-        write('Некорректный ввод. Введите слово ещё раз: ');
-      end
-      else
-        Inc(i);
-  until Ent;
-  Points := Length(PlayerWord);
-  TempSet := LettersSet;
-  i := 1;
-  RightLetters := true;
-  while RightLetters and (i <= length(PlayerWord)) do
-  begin
-    if Pos(PlayerWord[i], LettersSet) = 0 then
-      RightLetters := false
-    else
-    begin
-      Delete(LettersSet, Pos(PlayerWord[i], LettersSet), 1);
-      Inc(i);
-    end;
-  end;
-  if not RightLetters then
-  begin
-    Dec(PlayerScore, Points);
-    writeln('Ваше слово неверно. Количество Ваших очков уменьшается на ', Points,' и теперь составляет ', PlayerScore);
-    LettersSet := TempSet;
-  end
-  else
-  begin
-    Found := false;
-    i := 1;
-    while (not Found) and (i < FramePos) do
-    begin
-      if PlayerWord = Dict[i] then
-        Found := true
-      else
-        Inc(i);
-    end;
-    if not Found then
-    begin
-      writeln('Такого слова нет в словаре. Надо спросить согласие игроков на добавление его в словарь.');
-      i := 1;
-      Agree := true;
-      while Agree and (i <= PlayersCount) do
-      begin
-        if i <> CurrPlayer then
-        begin
-          write(i, '-й игрок (да/нет): ');
-          repeat
-            readln(AddWord);
-            Ent := true;
-            if (AddWord = 'да') or (AddWord = 'yes') or (AddWord = 'y') or (AddWord = 'д') then
 
-            else if (AddWord = 'нет') or (AddWord = 'no') or (AddWord = 'n') or (AddWord = 'н') then
-              Agree := false
-            else
-            begin
-              Ent := false;
-              write('Некорректный ввод. Повторите попытку (да/нет): ');
-            end;
-          until Ent;
-        end;
-      Inc(i);
-      end;
-      if Agree then
+    case Length(PlayerWord) of
+    0:
+    begin
+      write('Ход пропущен.');
+      Skip := true;
+    end;
+    1:
+      if (Pos(PlayerWord[i], Alphabet) = 0) then
       begin
-        Dict[FramePos] := PlayerWord;
-        Inc(FramePos);
-        Inc(PlayerScore, Points);
-        writeln('Теперь Ваше слово верно! Количество Ваших очков увеличивется на ', Points, ' и теперь составляет ', PlayerScore);
-        FillLettersSet(Playfield, LettersSet);
+        write('Некорректный ввод. Введите слово ещё раз: ');
+        Ent := false;
       end
       else
       begin
-        Dec(PlayerScore, Points);
-        writeln('Значит, ваше слово неверно. Количество Ваших очков уменьшается на ', Points, ' и теперь составляет ', PlayerScore);
-        LettersSet := TempSet;
+        write('Слишком короткое слово. Введите слово ещё раз: ');
+        Ent := false;
+      end
+    else
+      repeat
+        if (Pos(PlayerWord[i], Alphabet) = 0) then
+        begin
+          write('Некорректный ввод. Введите слово ещё раз: ');
+          Ent := false;
+        end
+        else
+          Inc(i);
+      until (Ent = false) or (i > length(PlayerWord));
+    end;
+  until Ent;
+
+  if not Skip then
+  begin
+    Points := Length(PlayerWord);
+    TempSet := LettersSet;
+
+    i := 1;
+    RightLetters := true;
+    repeat
+      ltrPos := Pos(PlayerWord[i], LettersSet);
+      if ltrPos = 0 then
+        RightLetters := false
+      else
+      begin
+        Delete(LettersSet, ltrPos, 1);
+        Inc(i);
       end;
+    until (RightLetters = false) or (i > Length(PlayerWord));
+
+    if not RightLetters then
+    begin
+      Dec(PlayerScore, Points);
+      writeln('Ваше слово неверно. Количество Ваших очков уменьшается на ', Points,' и теперь составляет ', PlayerScore);
+      LettersSet := TempSet;
+      LastLetter := '0';
     end
     else
     begin
-      Inc(PlayerScore, Points);
-      writeln('Ваше слово верно! Количество Ваших очков увеличивется на ', Points, ' и теперь составляет ', PlayerScore);
-      FillLettersSet(Playfield, LettersSet);
+      Found := false;
+      i := 1;
+      while (not Found) and (i < FramePos) do
+      begin
+        if PlayerWord = Dict[i] then
+          Found := true
+        else
+          Inc(i);
+      end;
+      if not Found then
+      begin
+        writeln('Такого слова нет в словаре. Надо спросить согласие игроков на добавление его в словарь.');
+        i := 1;
+        repeat
+          if i <> CurrPlayer then
+          begin
+            write(i, '-й игрок (да/нет): ');
+            Ent := false;
+            repeat
+              readln(AddWord);
+              if (AddWord = 'да') or (AddWord = 'yes') or (AddWord = 'y') or (AddWord = 'д') then
+              begin
+                Ent := true;
+                Agree := true;
+              end
+              else if (AddWord = 'нет') or (AddWord = 'no') or (AddWord = 'n') or (AddWord = 'н') then
+              begin
+                Ent := true;
+                Agree := false;
+              end
+              else
+                write('Некорректный ввод. Повторите попытку (да/нет): ');
+            until Ent;
+          end
+          else
+            Agree := true;
+          Inc(i);
+        until (Agree = false) or (i > PlayersCount);
+
+        if Agree then
+        begin
+          Dict[FramePos] := PlayerWord;
+          Inc(FramePos);
+
+          writeln('Теперь Ваше слово верно!');
+          if PlayerWord[1] = LastLetter then
+          begin
+            Points := Points * 2;
+            Writeln('БОНУС! Ваше слово начинается на ту же букву, на которую заканчивается последнее слово');
+            Writeln('Присуждённые Вам очки увеличиваются в 2 раза');
+          end;
+          LastLetter := PlayerWord[Length(PlayerWord)];
+          Inc(PlayerScore, Points);
+          writeln('Количество Ваших очков увеличивется на ', Points, ' и теперь составляет ', PlayerScore);
+          FillLettersSet(Playfield, LettersSet);
+        end
+        else
+        begin
+          Dec(PlayerScore, Points);
+          writeln('Значит, ваше слово неверно. Количество Ваших очков уменьшается на ', Points, ' и теперь составляет ', PlayerScore);
+          LettersSet := TempSet;
+          LastLetter := '0';
+        end;
+      end
+      else
+      begin
+        writeln('Ваше слово верно!');
+        if PlayerWord[1] = LastLetter then
+        begin
+          Points := Points * 2;
+          Writeln('БОНУС! Ваше слово начинается на ту же букву, на которую заканчивается последнее слово');
+          Writeln('Присуждённые Вам очки увеличиваются в 2 раза');
+        end;
+        LastLetter := PlayerWord[Length(PlayerWord)];
+        Inc(PlayerScore, Points);
+        writeln('Количество Ваших очков увеличивется на ', Points, ' и теперь составляет ', PlayerScore);
+        FillLettersSet(Playfield, LettersSet);
+      end;
     end;
   end;
+  Sleep(450);
 end;
 
-procedure Monitor; //интерфейс игрока
+procedure Monitor(var PlayersCount: SmallInt); //интерфейс игрока
+var
+  s : string;
+  ChoiceMove, c : integer;
 begin
-  Choice := 0;
   Writeln('======================================================*  ИГРОК ',i,'  *====================================================');
   Writeln;
-  Writeln('Текущее количество очков: ',PlayerScore[I]);
-  Writeln;
   Skip[I] := false;
+repeat
+  Writeln('===*  Что делаем?  *===');
+  Writeln;
+  Writeln('---> Ввести слово (1)');
+  Writeln('---> 50-на-50 (2)');
+  Writeln('---> Помощь друга (3)');
+  Writeln('---> Пропуск хода (4)');
+  Writeln;
   repeat
-    Writeln('===*  Что делаем?  *===');
-    Writeln;
-    Writeln('---> Ввести слово (1)');
-    Writeln('---> 50-на-50 (2)');
-    Writeln('---> Помощь друга (3)');
-    Writeln('---> Пропуск хода (4)');
-    //Writeln('---> Выход из программы (5) - пока не работает');
     repeat
-      try
-        Writeln;
-        Readln(Choice);
-        Writeln;
-        if (Choice<1) or (Choice>4) then
+      repeat
+        write('Выберите пункт меню: ');
+        Readln(s);
+        s := trim(s);
+        val(s,ChoiceMove,c);
+        if c <> 0 then
         begin
           Writeln;
           Writeln('===*  Ошибка ввода  *===');
           Writeln;
         end;
-      except
+      until c = 0;
+      if (ChoiceMove < 1) or (ChoiceMove > 4) then
+      begin
         Writeln;
         Writeln('===*  Ошибка ввода  *===');
         Writeln;
       end;
-    until (Choice>=1) and (Choice<=4);
-    Position := 7;
+    until (ChoiceMove >= 1) and (ChoiceMove <= 4);
+    Position := PlayersCount * 2 + 1;
     clrscr;
     fl := true;
-    case Choice of
-      1 : begin PlayerTurn(Language,Dict,FramePos,Playfield, I, LettersSet[I],PlayerScore[I],PlayersCount);
-          Position := 0; end;
-      2 : begin
-          if ChoiceHelp[I] then
-          begin
-            FifByFif(Playfield,LettersSet[I],PlayerScore[I]);
-            Position := 0;
-            ChoiceHelp[I] := false
-          end
-          else
-          begin
-            Writeln;
-            Writeln('===*  Подсказка уже была использована вами  *===');
-            fl := false;
-            Writeln;
-          end;
-      end;
-      3 : begin
-          if ChoiceHelp[I] then
-          begin
-            FriendHelp(LettersSet, i, PlayersCount);
-            Position := 0;
-            ChoiceHelp[I] := false
-          end
-          else
-          begin
-            Writeln;
-            Writeln('===*  Подсказка уже была использована вами  *===');
-            fl := false;
-            Writeln;
-          end;
-      end;
-      4 : begin Skip[I] := true;
-          Position := 0; end;
-      else
-      fl := false;
-      Writeln;
-      Writeln('===*  Ошибка ввода  *===');
-      Writeln;
-    end; //здесь будут подпрограммы
-  until fl;
+    case ChoiceMove of
+        1 : begin
+              PlayerTurn(Language,Dict,FramePos,Playfield, I, LettersSet[I],PlayerScore[I], Skip[i],PlayersCount, LastLetter);
+              Position := 0;
+            end;
+        2 : begin
+              if ChoiceHelp[I] then
+              begin
+                FifByFif(Playfield,LettersSet[I],PlayerScore[I]);
+                Position := 0;
+                ChoiceHelp[I] := false
+              end
+              else
+              begin
+                Writeln;
+                Writeln('===*  Подсказка уже была использована вами  *===');
+                fl := false;
+                Writeln;
+              end;
+            end;
+        3 : begin
+              if ChoiceHelp[I] then
+              begin
+                FriendHelp(LettersSet, i, PlayersCount);
+                Position := 0;
+                ChoiceHelp[I] := false
+              end
+              else
+              begin
+                Writeln;
+                Writeln('===*  Подсказка уже была использована вами  *===');
+                fl := false;
+                Writeln;
+              end;
+            end;
+        4 : begin
+              Skip[I] := true;
+              Position := 0;
+            end;
+        else
+        fl := false;
+        Writeln;
+        Writeln('===*  Ошибка ввода  *===');
+        Writeln;
+    end;
+    until fl;
+  until (ChoiceMove = 1) or (ChoiceMove = 4);
   Writeln;
   Writeln('Нажмите ENTER...');
   Writeln;
@@ -540,11 +613,12 @@ begin
   clrscr;
   ChoiceOfLanguage(Language);
   clrscr;
-  LettersCount := 0;
+
   case Language of
     Russian: AssignFile(Dictionary, '.\dictionaries\russian.txt');
     English: AssignFile(Dictionary, '.\dictionaries\english.txt');
   end;
+
   Reset(Dictionary);
   FramePos := 1;
   while not Eof(Dictionary) do
@@ -553,6 +627,7 @@ begin
     Inc(FramePos);
   end;
   StartFramePos := FramePos;
+
   NamePlayers(PlayersCount, MaxPlayerCount);
   clrscr;
   FillPlayfield(Playfield,Language);
@@ -563,15 +638,16 @@ begin
     for J := 1 to PlayersCount do
     begin
       FillLettersSet(Playfield, LettersSet[J]);
-      writeln('Строка игрока ',PlayerName[J],' : ', LettersSet[J]);
+      writeln('Строка ',J,'-ого игрока с именем ',PlayerName[J],' : ', LettersSet[J],'. Текущее количество очков: ',PlayerScore[J]);
     end;
-    Monitor;
+    Monitor(PlayersCount);
     clrscr;
     for J := 1 to PlayersCount do
       if Skip[J]=false then endgame := false;
     inc(I);
     if I=PlayersCount+1 then I := 1;
   until endgame;
+
   Writeln('======================================================*  ЭРУДИТ  *=====================================================');
   Writeln;
   Writeln('======================================================*  ИТОГИ   *=====================================================');
