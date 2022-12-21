@@ -38,7 +38,7 @@ var
   PlayersCount: SmallInt = 5;
   Language: TLanguage;
   NameTemp, Playfield: string;
-  fl, endgame : boolean;
+  Allowed, fl, endgame : boolean;
   LastLetter: char;
 
 procedure clrscr(var Position : integer); //очистка консоли
@@ -608,6 +608,7 @@ begin
               begin
                 Writeln;
                 Writeln('===*  Количество букв у Вас или в банке букв меньше, чем ',ChangesCount,'  *===');
+                fl := false;
                 Writeln;
               end;
               end;
@@ -615,22 +616,38 @@ begin
               if (Length(LettersSet[I]) > 0) then
                 if ChoiceHelp[I] then
                 begin
-                  FriendHelp(LettersSet, i, PlayersCount);
-                  Writeln('Нажмите Enter...');
-                  Readln;
-                  Position := 0;
-                  clrscr(Position);
-                  for J := 1 to PlayersCount do
+                  j := 1; Allowed := true;
+                  repeat
+                    if Length(LettersSet[j]) = 0 then
+                      Allowed := false;
+                    inc(j);
+                  until not Allowed or (j > PlayersCount);
+                  if Allowed then
                   begin
-                    FillLettersSet(Playfield, LettersSet[J]);
-                    writeln('Строка ',J,'-ого игрока с именем ',PlayerName[J],' : ', LettersSet[J],'. Текущее количество очков: ',PlayerScore[J]);
+                    FriendHelp(LettersSet, i, PlayersCount);
+                    Writeln('Нажмите Enter...');
+                    Readln;
+                    Position := 0;
+                    clrscr(Position);
+                    for J := 1 to PlayersCount do
+                    begin
+                      FillLettersSet(Playfield, LettersSet[J]);
+                      writeln('Строка ',J,'-ого игрока с именем ',PlayerName[J],' : ', LettersSet[J],'. Текущее количество очков: ',PlayerScore[J]);
+                    end;
+                    Writeln('======================================================*  ИГРОК ',i,'  *====================================================');
+                    Writeln;
+                    Writeln('===*  Ваш ход продолжается  *===');
+                    Writeln;
+                    Position := 0;
+                    ChoiceHelp[I] := false;
+                  end
+                  else
+                  begin
+                    Writeln;
+                    Writeln('===*  Вы не можете воспользоваться этой подсказкой  *===');
+                    fl := false;
+                    Writeln;
                   end;
-                  Writeln('======================================================*  ИГРОК ',i,'  *====================================================');
-                  Writeln;
-                  Writeln('===*  Ваш ход продолжается  *===');
-                  Writeln;
-                  Position := 0;
-                  ChoiceHelp[I] := false
                 end
                 else
                 begin
@@ -643,6 +660,7 @@ begin
               begin
                 Writeln;
                 Writeln('===*  У Вас нет букв  *===');
+                fl := false;
                 Writeln;
               end;
               end;
