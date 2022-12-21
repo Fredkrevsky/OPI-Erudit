@@ -73,40 +73,42 @@ begin
   writeln('-----------------------------------------');
 end;
 
-procedure FriendHelp(LettersSet: TLettersSets; PlayerNumber: SmallInt; const PlayerCount: SmallInt);
+procedure FriendHelp(var LettersSet: TLettersSets; PlayerNumber: SmallInt; const PlayerCount: SmallInt);
 const
   ABC = 'бвгджзйклмнпрстфхцчшщъьаеёиоуыэюяbcdfghjklmnpqrstvwxzaeiouy';
-var 
+var
   Ent: boolean;
-  FriendNumber, j, MyP, FrP: SmallInt;
-  MyLetter, FriendLetter, Temp: string;
+  FriendNumber, MyP, FrP: SmallInt;
+  MyLetter, FriendLetter: string;
 begin
-  writeln('Ваши буквы: ', LettersSet[PlayerNumber]);
-
+  writeln;
+ // writeln('Ваши буквы: ', LettersSet[PlayerNumber]);
   write('Выберите номер игрока, у которого Вы хотите обменять букву: ');
+
+  Ent := false;
   repeat
-    Ent := false;
     try
       readln(FriendNumber);
     except
       FriendNumber := 0;
     end;
     if (FriendNumber <= 0) or (FriendNumber > PlayerCount) then
-        write('Некоррекный номер игрока. Введите номер ещё раз: ')
-      else if FriendNumber = PlayerNumber then
-        write('Вы не можете взять букву у самого себя. Введите номер ещё раз: ')
-      else
-        Ent := true;
+      write('Некоррекный номер игрока. Введите номер ещё раз: ')
+    else if FriendNumber = PlayerNumber then
+      write('Вы не можете взять букву у самого себя. Введите номер ещё раз: ')
+    else if Length(LettersSet[FriendNumber]) = 0 then
+      write('У этого игрока больше нет букв. Введите номер ещё раз: ')
+    else
+      Ent := true;
   until Ent;
 
-  writeln('Его буквы: ', LettersSet[FriendNumber]);
-
+ // writeln('Его буквы: ', LettersSet[FriendNumber]);
   write('Выберите свою букву, которую хотите отдать: ');
-  repeat
-    Ent := false;
-    readln(MyLetter);
-    MyLetter := LowerCase(Trim(MyLetter));
 
+  Ent := false;
+  repeat
+    readln(MyLetter);
+    MyLetter := AnsiLowerCase(Trim(MyLetter));
     if Length(MyLetter) > 1 then
       write('Вы ввели строку, а не букву. Выберите букву ещё раз: ')
     else if Length(MyLetter) = 0 then
@@ -119,12 +121,11 @@ begin
       Ent := true;
   until Ent;
 
-  write('Выберите у друга букву, которую хотите забрать: ');
+  write('Выберите букву соперника, которую хотите забрать: ');
+  Ent := false;
   repeat
-    Ent := false;
     readln(FriendLetter);
-    MyLetter := LowerCase(Trim(MyLetter));
-
+    FriendLetter := AnsiLowerCase(Trim(FriendLetter));
     if Length(FriendLetter) > 1 then
       write('Вы ввели строку, а не букву. Выберите букву ещё раз: ')
     else if Length(FriendLetter) = 0 then
@@ -132,9 +133,9 @@ begin
     else if Pos(FriendLetter, ABC) = 0 then
       write('Это не буква. Выберите букву ещё раз: ')
     else if Pos(FriendLetter, LettersSet[FriendNumber]) = 0 then
-      write('Такой буквы нет среди букв друга. Выберите букву ещё раз: ')
+      write('Такой буквы нет среди букв соперника. Выберите букву ещё раз: ')
     else if MyLetter = FriendLetter then
-      write('Вы хотите заменить свою букву на такую же букву. Выберите букву ещё раз: ')
+      write('Вы забираете ту же букву, что и отдаёте. Выберите букву ещё раз: ')
     else
       Ent := true;
   until Ent;
@@ -145,14 +146,12 @@ begin
   Insert(Friendletter, LettersSet[PlayerNumber], MyP);
   Delete(LettersSet[FriendNumber], FrP + 1, 1);
   Delete(LettersSet[PlayerNumber], MyP + 1, 1);
-
+  Sleep(450);
+  Writeln('-----------------------------------------------------------------------------------------------------------------------');
   writeln('Теперь Ваши буквы: ', LettersSet[PlayerNumber]);
   writeln('Теперь его буквы: ', LettersSet[FriendNumber]);
-
-  Sleep(500);
-  writeln('-----------------------------------------');
-  writeln;
-
+  Sleep(450);
+  Writeln('-----------------------------------------------------------------------------------------------------------------------');
 end;
 
 begin

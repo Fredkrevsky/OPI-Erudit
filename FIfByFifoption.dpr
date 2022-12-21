@@ -10,6 +10,7 @@ uses
 const
   MaxPlayerCount = 10;
   MaxLettersCount = 10;
+  ChangesCount = 5;
 
 type
   TLanguage = (Russian, English);
@@ -79,31 +80,29 @@ begin
   writeln('-----------------------------------------');
 end;
 
-procedure FifByFif(var Playfield, LettersSet: string; var PlayerScore: integer);
+procedure FifByFif(var Playfield, LettersSet: string; const ChangesCount: byte; var PlayerScore: integer);
 const
-  ChangesCount = 5;
   Penalty = 2;
 var
   EntSet, TempSet: string;
   i, counter, ltrPos: SmallInt;
   Ent, InputError: boolean;
-
 begin
-  writeln('Ваши буквы: ', LettersSet);
+  writeln;
+//  writeln('Ваши буквы: ', LettersSet);
   write('Введите 5 букв, которые хотите заменить: ');
   TempSet := LettersSet;
   repeat
     readln(EntSet);
-    EntSet := LowerCase(EntSet);
+    EntSet := AnsiLowerCase(EntSet);                          // writeln(entset);
     counter := 0;
     LettersSet := TempSet;
     InputError := false;
     i := 1;
-
     while (InputError = false) and (i <= Length(EntSet)) do
     begin
       ltrPos := Pos(EntSet[i], LettersSet);
-      if (counter < ChangesCount) and (ltrPos <> 0) then
+      if (counter <= ChangesCount) and (ltrPos <> 0) then
       begin
         Inc(i);
         Delete(LettersSet, ltrPos, 1);
@@ -116,10 +115,14 @@ begin
             InputError := true;
         end;
     end;
-
     if InputError then
     begin
       write('Вы ошиблись при вводе. Введите буквы ещё раз: ');
+      Ent := false;
+    end
+    else if Length(EntSet) < 1 then
+    begin
+      write('Вы ничего не ввели. Введите буквы ещё раз: ');
       Ent := false;
     end
     else if counter < ChangesCount then
@@ -134,19 +137,15 @@ begin
     end
     else
       Ent := true;
-
   until Ent;
-                                       //         writeln('Сейчaс введено: ', EntSet);
-                                         //       writeln('Измененная строка: ', LettersSet);
+//  writeln('Сейчaс введено: ', EntSet);
+//  writeln('Измененная строка: ', LettersSet);
   Dec(PlayerScore, Penalty);
   writeln('Кол-во Ваших очков уменьшено на ', Penalty, ' и теперь составляет ', PlayerScore);
-
   FillLettersSet(Playfield, LettersSet);
-  writeln('Ваша новая строка: ', LettersSet);
-
+  writeln('Ваши новые буквы: ', LettersSet);
   Sleep(500);
-  writeln('-----------------------------------------');
-  writeln;
+  writeln('-----------------------------------------------------------------------------------------------------------------------');
 end;
 
 
@@ -156,7 +155,7 @@ begin
 
   LettersSet[1] := 'кпокумиода'; PlayerScore[1] := 100;
 
-  FifByFif(Playfield, LettersSet[1], PlayerScore[1]);
+  FifByFif(Playfield, LettersSet[1],ChangesCount, PlayerScore[1]);
 
 
   writeln('здесь конец программы');

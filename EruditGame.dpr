@@ -10,6 +10,8 @@ uses
 const
   MaxPlayerCount = 10;
   MaxLettersCount = 10;
+  ChangesCount = 5;
+
   WordsCount = 80000;
 
 type
@@ -53,7 +55,7 @@ begin
   SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursor);
 end;
 
-procedure ShowLogo; //правила игры
+procedure ShowLogo;
 begin
   Writeln;
   Writeln;
@@ -132,7 +134,7 @@ begin
       if c <> 0 then Writeln('===*  Ошибка ввода  *===');
     until c = 0;
     if (PlayersCount <= 1) or (PlayersCount > MaxPlayerCount) then Writeln('===*  Ошибка ввода  *===');
-  until (PlayersCount<=10) and (PlayersCount>1);
+  until (PlayersCount<=MaxPlayerCount) and (PlayersCount>1);
   Writeln('===*  Участвуют ',PlayersCount,' игрока(-ов)  *===');
   Writeln;
   Writeln('===*  Введите свои имена  *===');
@@ -209,9 +211,8 @@ begin
   writeln('-----------------------------------------------------------------------------------------------------------------------');
 end;
 
-procedure FifByFif(var Playfield, LettersSet: string; var PlayerScore: integer);
+procedure FifByFif(var Playfield, LettersSet: string; const ChangesCount: byte; var PlayerScore: integer);
 const
-  ChangesCount = 5;
   Penalty = 2;
 var
   EntSet, TempSet: string;
@@ -280,7 +281,7 @@ end;
 
 procedure FriendHelp(var LettersSet: TLettersSets; PlayerNumber: SmallInt; const PlayerCount: SmallInt);
 const
-  ABC = 'бвгджзйклмнпрстфхцчшщъьаеёиоуыэюяbcdfghjklmnpqrstvwxzaeiouyБВГДЖЗЙКЛМНПРСТФХЦЧШЩЪЬАЕЁИОУЫЭЮЯBCDFGHJKLMNPQRSTVWXZAEIOUY';
+  ABC = 'бвгджзйклмнпрстфхцчшщъьаеёиоуыэюяbcdfghjklmnpqrstvwxzaeiouy';
 var
   Ent: boolean;
   FriendNumber, MyP, FrP: SmallInt;
@@ -301,7 +302,7 @@ begin
       write('Некоррекный номер игрока. Введите номер ещё раз: ')
     else if FriendNumber = PlayerNumber then
       write('Вы не можете взять букву у самого себя. Введите номер ещё раз: ')
-    else if Length(LettersSet[PlayerNumber]) = 0 then
+    else if Length(LettersSet[FriendNumber]) = 0 then
       write('У этого игрока больше нет букв. Введите номер ещё раз: ')
     else
       Ent := true;
@@ -363,7 +364,7 @@ procedure PlayerTurn(Language: TLanguage; var Dict: TDict; var FramePos: integer
 const MaxLettersCount = 10;
 var
   Alphabet, PlayerWord, AddWord, TempSet: string;
-  i, ltrPos, l: integer;
+  i, ltrPos: integer;
   Points: byte;
   Ent, RightLetters, Found, Agree: boolean;
 begin
@@ -375,7 +376,7 @@ begin
       Alphabet := 'bcdfghjklmnpqrstvwxzaeiouy';
   end;
 
-  write('Введите Ваше слово: ');
+  write('Введите Ваше слово (ничего для пропуска хода): ');
   repeat
     readln(PlayerWord);
     PlayerWord := AnsiLowerCase(Trim(PlayerWord));                                                          // writeln(playerword);
@@ -576,10 +577,10 @@ begin
                 Position := 0;
               end;
           2 : begin
-              if length(PlayField) >= 5 then
+              if (length(PlayField) >= ChangesCount) and (Length(LettersSet[I]) >= ChangesCount) then
                 if ChoiceFifByFif[I] then
                 begin
-                  FifByFif(Playfield,LettersSet[I],PlayerScore[I]);
+                  FifByFif(Playfield,LettersSet[I], ChangesCount, PlayerScore[I]);
                   Writeln('Нажмите Enter...');
                   Readln;
                   Position := 0;
@@ -603,14 +604,15 @@ begin
                   fl := false;
                   Writeln;
                 end
-                else
-                begin
-                  Writeln;
-                  Writeln('===*  Количество букв в банке букв меньше 5-ти  *===');
-                  Writeln;
-                end;
+              else
+              begin
+                Writeln;
+                Writeln('===*  Количество букв у Вас или в банке букв меньше, чем ',ChangesCount,'  *===');
+                Writeln;
+              end;
               end;
           3 : begin
+              if (Length(LettersSet[I]) > 0) then
                 if ChoiceHelp[I] then
                 begin
                   FriendHelp(LettersSet, i, PlayersCount);
@@ -636,7 +638,13 @@ begin
                   Writeln('===*  Подсказка уже была использована вами  *===');
                   fl := false;
                   Writeln;
-                end;
+                end
+              else
+              begin
+                Writeln;
+                Writeln('===*  У Вас нет букв  *===');
+                Writeln;
+              end;
               end;
           4 : begin
                 Skip[I] := true;
@@ -693,10 +701,11 @@ begin
     end;
     Monitor(PlayersCount);
     clrscr(Position);
+
     for J := 1 to PlayersCount do
-      if Skip[J]=false then endgame := false;
+      if Skip[J] = false then endgame := false;
     inc(I);
-    if I=PlayersCount+1 then I := 1;
+    if I = PlayersCount + 1 then I := 1;
   until endgame;
 
   Writeln('======================================================*  ЭРУДИТ  *=====================================================');
@@ -736,5 +745,7 @@ begin
   //  writeln('writed: ', Dict[i]);
     Writeln(Dictionary, Dict[i]);
   end;
+  Close(Dictionary);
+
   Readln;
 end.

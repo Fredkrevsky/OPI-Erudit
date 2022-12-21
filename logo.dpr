@@ -7,24 +7,31 @@ program Logo;
 uses
   System.SysUtils;
 
-procedure ShowLogo();
+procedure ShowLogo;
 begin
+  Writeln;
+  Writeln;
+  Writeln;
+  Writeln;
+  Writeln;
+  Writeln;
+  Writeln;
+  Writeln;
+  Writeln;
+  Writeln('                 ннннн        ааааааа      ггг      ггг      ФФФФФФ        ШШ       ШШ    вввввввввввввв');
+  Writeln('                   нннн       аа    аа      ггг    ггг      ФФ    ФФ       ШШ     ШШШШ    вввввввввввввв');
+  Writeln('                     нннн     аа     аа      ггг  ггг       ФФ    ФФ       ШШ    ШШ ШШ         вввв     ');
+  Writeln('                 нннннннн     аа    аа        гг гг         ФФ    ФФ       ШШ   ШШ  ШШ         вввв     ');
+  Writeln('                     нннн     ааааааа          ггг          ФФ    ФФ       ШШ  ШШ   ШШ         вввв     ');
+  Writeln('                   нннн       аа              ггг          ФФФФФФФФФФ      ШШ ШШ    ШШ         вввв     ');
+  Writeln('                 ннннн        аа             ггг          ФФ        ФФ     ШШШШ     ШШ         вввв     ');
   writeln;
   writeln;
   writeln;
   writeln;
-  writeln;
-  writeln;
-  writeln;
-  writeln;
-  writeln;
-  writeln('               ннннн        ааааааа      ггг      ггг      ФФФФФФ        ШШ       ШШ    ввввввввввввввв');
-  writeln('                 нннн       аа    аа      ггг    ггг      ФФ    ФФ       ШШ     ШШШШ         вввв');
-  writeln('                   нннн     аа     аа      ггг  ггг       ФФ    ФФ       ШШ    ШШ ШШ         вввв');
-  writeln('               нннннннн     аа    аа        гг гг         ФФ    ФФ       ШШ   ШШ  ШШ         вввв');
-  writeln('                   нннн     ааааааа          ггг          ФФ    ФФ       ШШ  ШШ   ШШ         вввв');
-  writeln('                 нннн       аа              ггг          ФФФФФФФФФФ      ШШ ШШ    ШШ         вввв');
-  writeln('               ннннн        аа             ггг          ФФ        ФФ     ШШШШ     ШШ         вввв');
+  Sleep(1000);
+  write('Фыџ я№юфюыцхэшџ эрцьшђх ENTER...');
+  readln;
 end;
 begin
   showlogo;
