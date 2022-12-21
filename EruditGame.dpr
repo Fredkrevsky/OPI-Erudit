@@ -577,8 +577,8 @@ begin
                 Position := 0;
               end;
           2 : begin
-              if (length(PlayField) >= ChangesCount) and (Length(LettersSet[I]) >= ChangesCount) then
-                if ChoiceFifByFif[I] then
+              if ChoiceFifByFif[I] then
+                if (length(PlayField) >= ChangesCount) and (Length(LettersSet[I]) >= ChangesCount) then
                 begin
                   FifByFif(Playfield,LettersSet[I], ChangesCount, PlayerScore[I]);
                   Writeln('Нажмите Enter...');
@@ -600,21 +600,21 @@ begin
                 else
                 begin
                   Writeln;
-                  Writeln('===*  Подсказка уже была использована вами  *===');
+                  Writeln('===*  Количество букв у Вас или в банке букв меньше, чем ',ChangesCount,'  *===');
                   fl := false;
                   Writeln;
                 end
               else
               begin
                 Writeln;
-                Writeln('===*  Количество букв у Вас или в банке букв меньше, чем ',ChangesCount,'  *===');
+                Writeln('===*  Подсказка уже была использована Вами  *===');
                 fl := false;
                 Writeln;
               end;
               end;
           3 : begin
-              if (Length(LettersSet[I]) > 0) then
-                if ChoiceHelp[I] then
+              if ChoiceHelp[I] then
+                if (Length(LettersSet[I]) > 0) then
                 begin
                   j := 1; Allowed := true;
                   repeat
@@ -652,14 +652,14 @@ begin
                 else
                 begin
                   Writeln;
-                  Writeln('===*  Подсказка уже была использована вами  *===');
+                  Writeln('===*  У Вас нет букв  *===');
                   fl := false;
                   Writeln;
                 end
               else
               begin
                 Writeln;
-                Writeln('===*  У Вас нет букв  *===');
+                Writeln('===*  Подсказка уже была использована Вами  *===');
                 fl := false;
                 Writeln;
               end;
