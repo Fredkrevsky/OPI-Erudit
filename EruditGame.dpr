@@ -616,12 +616,12 @@ begin
               if ChoiceHelp[I] then
                 if (Length(LettersSet[I]) > 0) then
                 begin
-                  j := 1; Allowed := true;
+                  j := 1; Allowed := false;
                   repeat
-                    if Length(LettersSet[j]) = 0 then
-                      Allowed := false;
+                    if j <> I then
+                      Allowed := Allowed or (Length(LettersSet[j]) > 0);
                     inc(j);
-                  until not Allowed or (j > PlayersCount);
+                  until Allowed or (j > PlayersCount);
                   if Allowed then
                   begin
                     FriendHelp(LettersSet, i, PlayersCount);
